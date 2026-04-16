@@ -1,82 +1,119 @@
 import 'package:flutter/material.dart';
 
-class CategoriasHorizontal extends StatefulWidget {
+class CategoriasHorizontal extends StatelessWidget {
   const CategoriasHorizontal({super.key});
 
-  @override
-  State<CategoriasHorizontal> createState() => _CategoriasHorizontalState();
-}
-
-class _CategoriasHorizontalState extends State<CategoriasHorizontal> {
-  int _selected = 0;
-
-  static const List<_CatChip> _items = [
-    _CatChip(label: 'Todos', icon: Icons.grid_view_rounded),
-    _CatChip(label: 'Masculino', icon: Icons.man_outlined),
-    _CatChip(label: 'Femenino', icon: Icons.woman_outlined),
-    _CatChip(label: 'Infantiles', icon: Icons.child_care_outlined),
+  static const List<_SubCategory> _items = [
+    _SubCategory(
+      label: 'Tenis',
+      imageUrl:
+          'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
+    _SubCategory(
+      label: 'Botas',
+      imageUrl:
+          'https://images.pexels.com/photos/267301/pexels-photo-267301.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
+    _SubCategory(
+      label: 'Camisetas',
+      imageUrl:
+          'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
+    _SubCategory(
+      label: 'Futbol Sports',
+      imageUrl:
+          'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
+    _SubCategory(
+      label: 'Accesorios',
+      imageUrl:
+          'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
+    _SubCategory(
+      label: 'Deportivo',
+      imageUrl:
+          'https://images.pexels.com/photos/2827400/pexels-photo-2827400.jpeg?auto=compress&cs=tinysrgb&w=300',
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44,
+      height: 108,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
         itemCount: _items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (context, i) {
-          final isSelected = _selected == i;
-          return GestureDetector(
-            onTap: () => setState(() => _selected = i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF1A1A2E)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF1A1A2E)
-                      : const Color(0xFFE0E0E0),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _items[i].icon,
-                    size: 14,
-                    color: isSelected
-                        ? Colors.white
-                        : const Color(0xFF6B6B6B),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _items[i].label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF6B6B6B),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        separatorBuilder: (_, __) => const SizedBox(width: 18),
+        itemBuilder: (context, i) => _SubCategoryItem(item: _items[i]),
       ),
     );
   }
 }
 
-class _CatChip {
+class _SubCategoryItem extends StatelessWidget {
+  final _SubCategory item;
+  const _SubCategoryItem({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {},
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 68,
+              height: 68,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFF0EEF6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.network(
+                  item.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: const Color(0xFFE8E8E8),
+                    child: const Icon(
+                      Icons.image_outlined,
+                      color: Color(0xFFBDBDBD),
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              item.label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SubCategory {
   final String label;
-  final IconData icon;
-  const _CatChip({required this.label, required this.icon});
+  final String imageUrl;
+  const _SubCategory({required this.label, required this.imageUrl});
 }
