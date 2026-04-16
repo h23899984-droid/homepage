@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/auth_state.dart';
+import '../services/api_service.dart';
+import '../screens/login.dart';
 
 class GridProductos extends StatelessWidget {
   final List<dynamic> products;
@@ -111,17 +114,104 @@ class GridProductos extends StatelessWidget {
   }
 }
 
-class _ProductCard extends StatelessWidget {
+class _ProductCard extends StatefulWidget {
   final dynamic product;
   final Color accentColor;
 
   const _ProductCard({required this.product, required this.accentColor});
 
   @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
+  bool _adding = false;
+
+  Future<void> _handleAddToCart() async {
+    if (!authState.isLoggedIn) {
+      final shouldLogin = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'Inicia sesion',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A2E),
+            ),
+          ),
+          content: const Text(
+            'Para agregar productos al carrito necesitas iniciar sesion.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF6B6B6B)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Color(0xFF6B6B6B))),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1A1A2E),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Iniciar sesion'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLogin == true && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+      return;
+    }
+
+    setState(() => _adding = true);
+    try {
+      final product = Map<String, dynamic>.from(widget.product);
+      await ApiService.addToCart(authState.userId!, product, 1);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '${product['name'] ?? 'Producto'} agregado al carrito'),
+            backgroundColor: const Color(0xFF1A5C3A),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al agregar al carrito'),
+            backgroundColor: Color(0xFFD32F2F),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _adding = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final name = product['name']?.toString() ?? 'Producto';
-    final price = product['price']?.toString() ?? '0.00';
-    final imageUrl = product['image_url']?.toString() ?? '';
+    final name = widget.product['name']?.toString() ?? 'Producto';
+    final price = widget.product['price']?.toString() ?? '0.00';
+    final imageUrl = widget.product['image_url']?.toString() ?? '';
 
     return Container(
       decoration: BoxDecoration(
@@ -148,9 +238,9 @@ class _ProductCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (_, __, ___) =>
-                          _PlaceholderImage(color: accentColor),
+                          _PlaceholderImage(color: widget.accentColor),
                     )
-                  : _PlaceholderImage(color: accentColor),
+                  : _PlaceholderImage(color: widget.accentColor),
             ),
           ),
           Padding(
@@ -177,18 +267,27 @@ class _ProductCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: accentColor,
+                        color: widget.accentColor,
                       ),
                     ),
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: accentColor,
-                        borderRadius: BorderRadius.circular(8),
+                    GestureDetector(
+                      onTap: _adding ? null : _handleAddToCart,
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: widget.accentColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _adding
+                            ? const Padding(
+                                padding: EdgeInsets.all(6),
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Icon(Icons.add,
+                                color: Colors.white, size: 18),
                       ),
-                      child: const Icon(Icons.add,
-                          color: Colors.white, size: 18),
                     ),
                   ],
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/auth_state.dart';
 import '../widgets/buscador.dart';
 import '../widgets/categorias_horizontal.dart';
 import '../widgets/banner_slider.dart';
@@ -7,6 +8,7 @@ import '../widgets/grid_productos.dart';
 import 'categorias/masculino.dart';
 import 'categorias/femenino.dart';
 import 'categorias/infantiles.dart';
+import 'cart.dart';
 import 'login.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -105,20 +107,39 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon:
-                const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_outlined, color: Colors.white),
+            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (_) => false,
-              );
+              if (!authState.isLoggedIn) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartScreen()),
+                );
+              }
             },
           ),
+          if (authState.isLoggedIn)
+            IconButton(
+              icon: const Icon(Icons.logout_outlined, color: Colors.white),
+              onPressed: () {
+                authState.clearUser();
+                setState(() {});
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.login_outlined, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                ).then((_) => setState(() {}));
+              },
+            ),
         ],
       ),
       body: RefreshIndicator(

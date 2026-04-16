@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/auth_state.dart';
 import 'home.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (!mounted) return;
       if (result['success'] == true) {
+        authState.setUser(result['user']);
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),

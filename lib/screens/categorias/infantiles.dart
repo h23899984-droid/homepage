@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../../services/auth_state.dart';
 import '../../widgets/buscador.dart';
 import '../../widgets/categorias_horizontal.dart';
 import '../../widgets/banner_slider.dart';
 import '../../widgets/grid_productos.dart';
+import '../cart.dart';
+import '../login.dart';
 
 class InfantilesScreen extends StatefulWidget {
   const InfantilesScreen({super.key});
@@ -63,8 +66,16 @@ class _InfantilesScreenState extends State<InfantilesScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
-            onPressed: () {},
+            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+            onPressed: () {
+              if (!authState.isLoggedIn) {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()));
+              } else {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const CartScreen()));
+              }
+            },
           ),
         ],
       ),
